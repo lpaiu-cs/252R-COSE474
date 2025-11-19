@@ -1,7 +1,6 @@
 """
-
-HW4
-
+25-2 COSE474 Deep Learning HW4
+2022320140 컴퓨터학과 김준영
 """
 
 import torch
@@ -193,8 +192,23 @@ class nn_convolutional_layer:
     #######
     # Q1. Complete this method
     #######
-    def forward(self, x):
-        return out
+    def forward(self, x): # x.shape=(batch_size, input_channel_size, in_height, in_width)
+        batch_size, in_ch_size, in_height, in_width = x.shape
+        out_ch_size, in_ch_size, f_height, f_width = self.W.shape
+        out_height = in_height - f_height + 1
+        out_width = in_width - f_width + 1
+
+        # windows 생성 및 flatten
+        windows = view_as_windows(
+            x, (1, in_ch_size, f_height, f_width)
+        ) # shape=(batch_size, 1, out_height, out_width, in_ch_size, f_height, f_width)
+        windows = windows.reshape(batch_size, out_height, out_width, -1)
+        filters = self.W.reshape(out_ch_size, -1).T
+
+        out = torch.matmul(windows, filters)  # shape=(batchsize, out_height, out_width, out_ch_size)
+        out = out.permute(0, 3, 1, 2)
+
+        return out # out.shape=(batch_size, numfilter, out_height, out_width)
 
     
 
@@ -214,9 +228,33 @@ class nn_max_pooling_layer:
     #######
     # Q2. Complete this method
     #######
-    def forward(self, x):
-        return out
+    def forward(self, x): # x.shape=(batch_size, input_channel_size, in_height, in_width)
+        batch_size, in_ch_size, in_height, in_width = x.shape
+        out_height = (in_height - self.pool_size) // self.stride + 1
+        out_width = (in_width - self.pool_size) // self.stride + 1
 
+        # windows 생성 및 flatten
+        windows = view_as_windows(
+            x, (1, 1, self.pool_size, self.pool_size), step=(1, 1, self.stride, self.stride)
+        ) # shape=(batch_size, in_ch_size, out_height, out_width, 1, 1, pool_size, pool_size)
+        windows = windows.reshape(batch_size, in_ch_size, out_height, out_width, -1)
+        out, _ = torch.max(windows, dim=-1)  # shape=(batchsize, in_ch_size, out_height, out_width)
+
+        return out # out.shape=(batch_size, input_channel_size, out_height, out_width)
+    
+    # # unfold 방식으로 구현한 경우
+    # def forward(self, x): # x.shape=(batch_size, input_channel_size, in_height, in_width)
+    #     batch_size, in_ch_size, in_height, in_width = x.shape
+
+    #     # windows 생성 및 flatten
+    #     windows = (
+    #         x.unfold(2, self.pool_size, self.stride)
+    #          .unfold(3, self.pool_size, self.stride)
+    #     ) # shape=(batch_size, in_ch_size, out_height, out_width, pool_size, pool_size)
+    #     windows = windows.reshape(batch_size, in_ch_size, windows.size(2), windows.size(3), -1)
+    #     out, _ = torch.max(windows, dim=-1)  # shape=(batchsize, in_ch_size, out_height, out_width)
+
+    #     return out # out.shape=(batch_size, input_channel_size, out_height, out_width)
     
     #######
     ## If necessary, you can define additional class methods here
