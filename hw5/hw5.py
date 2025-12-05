@@ -1,7 +1,6 @@
 """
-
-HW5
-
+25-2 COSE474 Deep Learning HW5
+2022320140 컴퓨터학과 김준영
 """
 import sys
 import os
