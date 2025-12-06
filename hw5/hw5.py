@@ -91,17 +91,16 @@ class nn_mnist_classifier:
         cv1_f = self.conv_layer_1.forward(x)
 
         # similarly, fill in ... part in the below
-        ac1_f = ...
-        mp1_f = ...
+        ac1_f = self.act_1.forward(cv1_f)
+        mp1_f = self.maxpool_layer_1.forward(ac1_f)
 
-        fc1_f = ...
-        ac2_f = ...
+        fc1_f = self.fc1.forward(mp1_f.reshape(x.shape[0], -1))
+        ac2_f = self.act_2.forward(fc1_f)
 
-        fc2_f = ...
+        fc2_f = self.fc2.forward(ac2_f)
 
-        sm1_f = ...
-
-        cn_f = ...
+        sm1_f = self.sm1.forward(fc2_f)
+        cn_f = self.xent.forward(sm1_f, y)
 
         ########################
         # Q1 ends here
@@ -140,28 +139,26 @@ class MNISTClassifier_PT(nn.Module):
         # input channel size: 1
         # output channel size (number of filters): 28
 
-        self.conv_layer_1 = ...
+        self.conv_layer_1 = nn.Conv2d(in_channels=1, out_channels=28, kernel_size=3, stride=1, padding=0)
         
         # activation: relu
-        self.act_1 = ... 
-
+        self.act_1 = nn.ReLU() 
         # activaition map output: map size 26 x 26, 28 channels
 
         # maxpool
-        self.maxpool_layer_1 = ...
-
+        self.maxpool_layer_1 = nn.MaxPool2d(kernel_size=2, stride=2)
         # after max pool, map size 13 x 13, 28 channels
 
         # fully connected layer 1
         # input: 13 x 13 with 28 channels
         # output 128
-        self.fc1 = ... 
-        self.act_2 = ...
+        self.fc1 = nn.Linear(in_features=28*13*13, out_features=128)
+        self.act_2 = nn.ReLU()
 
-        # fully connected layer 1
+        # fully connected layer 2
         # input 128
         # output 10
-        self.fc2 = ...
+        self.fc2 = nn.Linear(in_features=128, out_features=10)
         ########################
         # Q2. ends here
         ########################
@@ -181,16 +178,16 @@ class MNISTClassifier_PT(nn.Module):
         # ... and so on
 
         cv1_f = self.conv_layer_1(x)
-        ac1_f = ...
-        mp1_f = ...
+        ac1_f = self.act_1(cv1_f)
+        mp1_f = self.maxpool_layer_1(ac1_f)
         
         # flatten for input to linear layer
-        mp1_f = ...
+        mp1_f = mp1_f.view(x.size(0), -1)
         
-        fc1_f = ...
-        ac2_f = ...
+        fc1_f = self.fc1(mp1_f)
+        ac2_f = self.act_2(fc1_f)
         
-        out_logit = ...
+        out_logit = self.fc2(ac2_f)
         ########################
         # Q3 ends here
         ########################
@@ -221,7 +218,7 @@ if __name__ == '__main__':
     # divide train into training and validation
     # set the dataset size
     # 50000 training and 10000 validation samples
-    n_train_sample = 50000
+    n_train_sample = 5000
     n_val_sample = len(y_train) - n_train_sample
 
     # data preprocessing
@@ -255,9 +252,9 @@ if __name__ == '__main__':
     # Q. Set learning rate, batch size and total number of epochs for training
     # There are no definitive answers, experiement with several hyperparameters
     ########################
-    lr = ...
-    n_epoch = ...
-    batch_size = ...
+    lr = 0.01
+    n_epoch = 10
+    batch_size = 64
     val_batch = 100
     test_batch = 100
 
@@ -267,7 +264,7 @@ if __name__ == '__main__':
     ########################
     # Set this True for PyTorch module-based classifier
     # Set this False for your custom classifier
-    PYTORCH_BUILTIN = True
+    PYTORCH_BUILTIN = False
 
     # define classifier
     if PYTORCH_BUILTIN:

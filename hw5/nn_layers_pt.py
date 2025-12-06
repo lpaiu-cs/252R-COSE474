@@ -195,11 +195,11 @@ class nn_convolutional_layer:
         self.b = b.clone().detach()
 
     def forward(self, x):
-        
         ###################################
         # Q4. Implement your layer here
         ###################################
-        pass
+        out = F.conv2d(x, self.W, bias=self.b.reshape(-1), stride=1, padding=0)
+        return out
         
     
     def step(self, lr, friction):
@@ -222,7 +222,8 @@ class nn_max_pooling_layer:
         ###################################
         # Q5. Implement your layer here
         ###################################
-        pass
+        out = F.max_pool2d(x, kernel_size=self.pool_size, stride=self.stride)
+        return out
 
 # relu activation
 class nn_activation_layer:
@@ -250,7 +251,6 @@ class nn_fc_layer:
         self.v_W = torch.zeros_like(self.W)
         self.v_b = torch.zeros_like(self.b)
 
-    ## Q1
     def forward(self,x):
         # compute forward pass of given parameter
         # output size is batch x output_size x 1 x 1
