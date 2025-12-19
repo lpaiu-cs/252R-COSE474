@@ -1,3 +1,4 @@
 __pycache__/
 *.pyc
 .DS_Store
+hw6/imdb_dataset_dict.pt
